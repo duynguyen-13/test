@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Library Management System</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    h2 {
+        text-align: center;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    table, th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    .form-group {
+        margin-bottom: 10px;
+    }
+    .form-group label {
+        display: block;
+        font-weight: bold;
+    }
+    .form-group input[type="text"], .form-group input[type="number"] {
+        width: 100%;
+        padding: 5px;
+        font-size: 16px;
+    }
+    .form-group button {
+        padding: 8px 20px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Library Management System</h2>
+    <div class="form-group">
+        <label for="title">Title:</label>
+        <input type="text" id="title">
+    </div>
+    <div class="form-group">
+        <label for="author">Author:</label>
+        <input type="text" id="author">
+    </div>
+    <div class="form-group">
+        <label for="id">ID:</label>
+        <input type="number" id="id">
+    </div>
+    <div class="form-group">
+        <button onclick="addBook()">Add Book</button>
+        <button onclick="deleteBook()">Delete Book</button>
+        <button onclick="updateBook()">Update Book</button>
+        <button onclick="borrowBook()">Borrow Book</button>
+        <button onclick="returnBook()">Return Book</button>
+    </div>
+    <div class="form-group">
+        <label for="search">Search:</label>
+        <input type="text" id="search" oninput="searchBooks()">
+    </div>
+    <table id="bookTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="bookList"></tbody>
+    </table>
+</div>
+
+<script>
+    class Book {
+        constructor(id, title, author) {
+            this.id = id;
+            this.title = title;
+            this.author = author;
+            this.borrowed = false;
+        }
+    }
+
+    let libraryQueue = [];
+    let borrowedQueue = [];
+
+    function addBook() {
+        const id = document.getElementById('id').value;
+        const title = document.getElementById('title').value;
+        const author = document.getElementById('author').value;
+        if (!id || !title || !author) {
+            alert('Please fill in all fields.');
+            return;
+        }
+        const newBook = new Book(id, title, author);
+        libraryQueue.push(newBook);
+        displayBooks();
+        clearForm();
+    }
+
+    function deleteBook() {
+        const id = document.getElementById('id').value;
+        if (!id) {
+            alert('Please enter the ID of the book to delete.');
+            return;
+        }
+        const index = libraryQueue.findIndex(book => book.id === id);
+        if (index === -1) {
+            alert('Book not found in the library.');
+            return;
+        }
+        libraryQueue.splice(index, 1);
+        displayBooks();
+        clearForm();
+    }
+
+    function updateBook() {
+        const id = document.getElementById('id').value;
+        const title = document.getElementById('title').value;
+        const author = document.getElementById('author').value;
+        if (!id || !title || !author) {
+            alert('Please fill in all fields.');
+            return;
+        }
+        const index = libraryQueue.findIndex(book => book.id === id);
+        if (index === -1) {
+            alert('Book not found in the library.');
+            return;
+        }
+        libraryQueue[index].title = title;
+        libraryQueue[index].author = author;
+        displayBooks();
+        clearForm();
+    }
+
+    function borrowBook() {
+        const id = document.getElementById('id').value;
+        if (!id) {
+            alert('Please enter the ID of the book to borrow.');
+            return;
+        }
+        const index = libraryQueue.findIndex(book => book.id === id);
+        if (index === -1) {
+            alert('Book not found in the library.');
+            return;
+        }
+        const borrowedBook = libraryQueue.splice(index, 1)[0];
+        borrowedBook.borrowed = true;
+        borrowedQueue.push(borrowedBook);
+        displayBooks();
+        clearForm();
+    }
+
+    function returnBook() {
+        const id = document.getElementById('id').value;
+        if (!id) {
+            alert('Please enter the ID of the book to return.');
+            return;
+        }
+        const index = borrowedQueue.findIndex(book => book.id === id);
+        if (index === -1) {
+            alert('Book not found in the borrowed books.');
+            return;
+        }
+        const returnedBook = borrowedQueue.splice(index, 1)[0];
+        returnedBook.borrowed = false;
+        libraryQueue.push(returnedBook);
+        displayBooks();
+        clearForm();
+    }
+
+    function searchBooks() {
+        const searchInput = document.getElementById('search').value.toLowerCase();
+        const filteredBooks = libraryQueue.filter(book => book.title.toLowerCase().includes(searchInput) || book.author.toLowerCase().includes(searchInput));
+        displayBooks(filteredBooks);
+    }
+
+    function displayBooks(books = libraryQueue) {
+        const bookList = document.getElementById('bookList');
+        bookList.innerHTML = '';
+        books.forEach(book => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${book.id}</td>
+                <td>${book.title}</td>
+                <td>${book.author}</td>
+                <td>${book.borrowed ? 'Borrowed' : 'Available'}</td>
+            `;
+            bookList.appendChild(row);
+        });
+    }
+
+    function clearForm() {
+        document.getElementById('id').value = '';
+        document.getElementById('title').value = '';
+        document.getElementById('author').value = '';
+    }
+</script>
+</body>
+</html>
