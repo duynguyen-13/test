@@ -12,18 +12,15 @@ class Queue {
     constructor() {
         this.items = [];
     }
-
     enqueue(item) {
         this.items.push(item);
     }
-
     dequeue() {
         if (this.isEmpty()) {
             return "Underflow";
         }
         return this.items.shift();
     }
-
     isEmpty() {
         return this.items.length === 0;
     }
@@ -84,7 +81,7 @@ function deleteBook() {
         return;
     }
 
-    displayBooks();
+    displayBooks(libraryQueue.items.concat(borrowedQueue.items));
     clearForm();
 }
 
@@ -121,7 +118,7 @@ function updateBook() {
     if (author) {
         bookToUpdate.author = author;
     }
-    displayBooks();
+    displayBooks(libraryQueue.items.concat(borrowedQueue.items));
     clearForm();
 }
 
